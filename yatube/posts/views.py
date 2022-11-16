@@ -124,7 +124,7 @@ def add_comment(request, post_id):
 def follow_index(request):
     """Подписки."""
     posts = Post.objects.filter(author__following__user=request.user)
-    paginator = Paginator(posts, 10)
+    paginator = Paginator(posts, AMOUNT)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {'page_obj': page}
@@ -134,9 +134,8 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = User.objects.get(username=username)
-    is_follower = Follow.objects.filter(user=request.user, author=author)
-    if request.user != author and not is_follower.exists():
-        Follow.objects.create(user=request.user, author=author)
+    if request.user != author:
+        Follow.objects.get_or_create(user=request.user, author=author)
     return redirect('posts:profile', username=username)
 
 
@@ -144,6 +143,5 @@ def profile_follow(request, username):
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
     is_follower = Follow.objects.filter(user=request.user, author=author)
-    if is_follower.exists():
-        is_follower.delete()
+    is_follower.delete()
     return redirect('posts:profile', username=username)

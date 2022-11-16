@@ -22,7 +22,7 @@
             {% endif %}             
           </div>
           <div class="card-body">        
-            <form method="post" action="{% url 'posts:post_create' %}"
+            <form method="post"
             enctype="multipart/form-data">
               {% csrf_token %}
 

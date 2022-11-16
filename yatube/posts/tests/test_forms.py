@@ -19,9 +19,24 @@ class PostCreateFormTests(TestCase):
         super().setUpClass()
         cls.user = User.objects.create_user(username='test')
 
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
+
         cls.group = Group.objects.create(
             title='Проза',
             slug='test_slug')
+
         cls.group_test = Group.objects.create(
             title='поэма',
             slug='test')
@@ -44,27 +59,14 @@ class PostCreateFormTests(TestCase):
     def test_create_post(self):
         """Валидная форма создает запись в Post."""
 
+        IMAGE = 'posts/small.gif'
         posts_count = Post.objects.count()
-
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=small_gif,
-            content_type='image/gif'
-        )
 
         # Создание с картинкой.
         form_data = {
             'text': 'Пост 2',
             'group': PostCreateFormTests.group.id,
-            'image': uploaded
+            'image': PostCreateFormTests.uploaded
         }
 
         response = self.authorized_client.post(
@@ -82,22 +84,40 @@ class PostCreateFormTests(TestCase):
             Post.objects.filter(
                 text='Пост 2',
                 author=PostCreateFormTests.user,
-                group=PostCreateFormTests.group
+                group=PostCreateFormTests.group,
+                image=IMAGE
             ).exists()
         )
 
     def test_edit_post(self):
         """Валидная форма редактирования поста."""
 
+        IMG = 'posts/another.gif'
         post = PostCreateFormTests.post
+
+        gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        uploaded = SimpleUploadedFile(
+            name='another.gif',
+            content=gif,
+            content_type='image/gif'
+        )
 
         form_data = {
             'text': 'изменился',
-            'group': PostCreateFormTests.group_test.id
+            'group': PostCreateFormTests.group_test.id,
+            'image': uploaded,
         }
 
         response = self.authorized_client.post(
-            reverse("posts:post_edit", kwargs=({'post_id': post.id})),
+            reverse("posts:post_edit",
+                    kwargs=({'post_id': post.id})),
             data=form_data,
             follow=True,
         )
@@ -105,14 +125,15 @@ class PostCreateFormTests(TestCase):
         self.assertRedirects(response,
                              reverse('posts:post_detail',
                                      kwargs={
-                                         'post_id': post.pk
+                                         'post_id': post.id
                                      }))
         # Проверяем, изменился ли пост.
         self.assertTrue(Post.objects.filter(
             text=form_data['text'],
             pk=PostCreateFormTests.post.pk,
             author=PostCreateFormTests.user,
-            group=PostCreateFormTests.group_test).exists())
+            group=PostCreateFormTests.group_test,
+            image=IMG).exists())
 
     def test_create_check_fields_form(self):
         """Проверка полей формы на принадлежность экземплярам."""
@@ -167,6 +188,7 @@ class PostCreateFormTests(TestCase):
         )
         self.assertTrue(
             Comment.objects.filter(
+                author=PostCreateFormTests.user,
                 post=PostCreateFormTests.post.pk,
                 text=form_data['text']
             ).exists()

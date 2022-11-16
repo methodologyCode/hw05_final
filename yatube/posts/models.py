@@ -6,6 +6,7 @@ User = get_user_model()
 
 class Follow(models.Model):
     """Подсписки."""
+
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              related_name='follower')
     author = models.ForeignKey(User, on_delete=models.CASCADE,
@@ -14,6 +15,7 @@ class Follow(models.Model):
 
 class Post(models.Model):
     """Посты."""
+
     text = models.TextField('Содержание', help_text='Введите текст')
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True,
                                     db_index=True)
@@ -31,6 +33,7 @@ class Post(models.Model):
 
     class Meta:
         """Изменение поведения модели."""
+
         ordering = ['-pub_date']
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
@@ -42,6 +45,7 @@ class Post(models.Model):
 
 class Group(models.Model):
     """Группы."""
+
     title = models.CharField(max_length=200, verbose_name='Название',
                              help_text='Введите название')
     slug = models.SlugField(unique=True)
@@ -55,6 +59,7 @@ class Group(models.Model):
 
 class Comment(models.Model):
     """Комментарии пользователей."""
+
     post = models.ForeignKey(Post, on_delete=models.CASCADE,
                              related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE,
