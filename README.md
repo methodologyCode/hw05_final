@@ -1,3 +1,39 @@
 # hw05_final
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+### Описание
+Социальная сеть блогеров YaTube - позволяет писать и публиковать посты в отдельных группах, добавлять и удалять записи и подписываться на любимых блогеров.
+* Есть возможность добавлять комментарии к постам других пользователей. На странице поста под текстом записи выводится форма для отправки комментария, а ниже — список комментариев. 
+* Комментировать могут только авторизованные пользователи. 
+* Присутсвует система подписки на авторов и создана лента их постов.
+* Написаны тесты проверяющие работу сервисов
+
+### Как запустить проект
+
+Клонируйте репозиторий:
+```
+git clone git@github.com:methodologyCode/hw05_final.git
+```
+
+Установите и активируйте виртуальное окружение:
+- для MacOS
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+- для Windows
+```
+python -m venv venv
+source venv/Scripts/activate
+```
+Установите зависимости из файла requirements.txt:
+```
+pip install -r requirements.txt
+```
+Примените миграции:
+```
+python manage.py migrate
+```
+В папке с файлом manage.py выполните команду:
+```
+python manage.py runserver
+```
